@@ -1,0 +1,17 @@
+# Build
+/build
+/build-*/
+CMakeFiles/
+CMakeCache.txt
+Testing/
+CTestTestfile.cmake
+cmake_install.cmake
+compile_commands.json
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Mac
+.DS_Store

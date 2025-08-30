@@ -1,0 +1,32 @@
+Use AGENTS.md as the charter.
+
+Before coding:
+- cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+- cmake --build build -j
+- ctest --test-dir build || true
+
+Objective: complete the entire OctoWeave application end-to-end.
+
+Phases (execute in order, one at a time):
+1) Scaffold sanity — ensure current tree builds and tests run green (even if trivial).
+2) ChunkGrid — implement API + unit tests (see AGENTS.md §2).
+3) Prob union — implement union_prob8_stable + tests (AGENTS.md §3).
+4) Hierarchy — implement bottom-up builder + tests (AGENTS.md §4).
+5) Octo interface — implement IOctoTree & OctoChunker stub + tests (AGENTS.md §5).
+6) p8est mapping (stub) — implement mapping + tests (AGENTS.md §6).
+7) Visualization tool — implement CLI & minimal rendering + tests (AGENTS.md §7).
+8) Parallel chunk execution — thread launcher + determinism tests (AGENTS.md §8).
+9) (Optional) OctoMap / p8est integrations behind flags (AGENTS.md §9).
+10) End-to-end demo + tests (AGENTS.md §10).
+
+Rules:
+- After each phase, run ctest and commit.
+- Keep headers clean; maintainers will read public API first.
+- Prefer small PR-sized commits per phase.
+
+Exit criteria:
+- All unit tests green.
+- octoweave_viz produces expected images for tiny CSV inputs.
+
+Now begin with Phase 1.
+
