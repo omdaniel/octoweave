@@ -12,6 +12,8 @@ OctoWeave Documentation
    python_api
    cli
    policies
+   design
+   roadmap
    viz
    integration
    cpp_api
@@ -20,4 +22,3 @@ OctoWeave Documentation
    faq
    contributing
    changelog
-

@@ -7,6 +7,74 @@ A scaffold for building a chunked OctoMap → p8est pipeline with:
 - a CLI visualization tool for OctoMap levels (implemented: PGM slice and SVG histogram)
 - stepwise agent prompts (Codex CLI) to implement & test modules in phases
 
+## Motivation & Problem Statement
+
+Most mapping stacks face a trade‑off between fidelity, throughput, and downstream
+mesh/analysis friendliness:
+
+- High‑fidelity occupancy maps (e.g., OctoMap) are great for probabilistic fusion,
+  but become heavy at deep resolutions and awkward to distribute across cores/nodes.
+- Distributed/AMR meshes (e.g., p4est/p8est) are excellent for parallelism and
+  numeric workloads, but don’t natively encode Bayesian fusion or sensor semantics.
+
+OctoWeave bridges these worlds by:
+
+- Ingesting point clouds into per‑chunk OctoMaps (easy to parallelize) at a chosen
+  resolution, with configurable sensor model (hit/miss/clamp, ray freespace).
+- Performing bottom‑up probabilistic rollups to a compact hierarchy with well‑defined
+  thresholds for leaf vs. internal nodes.
+- Emitting a p8est forest with n³ root trees (brick layout) and per‑quadrant data
+  (e.g., mean occupancy), using deterministic refinement policies.
+
+The result is a fast, testable pipeline that produces an AMR structure ready for
+large‑scale simulation, analysis, or further meshing — while retaining a principled
+probabilistic foundation.
+
+## When to Use OctoWeave
+
+- Robotics & autonomy: fuse multiple scans into a globally consistent occupancy
+  hierarchy, then export an AMR forest to plan or simulate at scale.
+- Environmental mapping: dense regions (structures/vegetation) vs. sparse/empty
+  perimeters — refine where it matters, stay coarse elsewhere.
+- HPC pre‑processing: convert raw occupancy evidence into p8est for PDE/CFD/heat‑map
+  solvers that expect adaptive trees and per‑cell data.
+- Research prototyping: clear interfaces, stubs for optional deps, strong unit
+  tests — easy to swap in real OctoMap/p8est when available.
+
+## Why OctoMap + p8est
+
+- OctoMap: mature Bayesian occupancy grid in an octree; sensor‑model friendly,
+  robust log‑odds updates, freespace carving via ray insertion.
+- p8est: scalable adaptive forest (n³ roots), proven in HPC; supports refinement,
+  balancing, callbacks, and per‑quadrant user data; ideal for downstream numerics.
+
+OctoWeave separates the concerns: fuse evidence where it’s natural (OctoMap), then
+export to a data structure built for parallel mesh/AMR workflows (p8est).
+
+## High‑Level Workflow
+
+1) Chunking: Partition world AABB into n×n×n chunks; route points per chunk.
+2) Per‑chunk build: Insert into OctoMaps (or stub), export leaf probabilities at a
+   target emission resolution (with a safety cap on depth).
+3) Hierarchy: Bottom‑up union; threshold with a child‑evidence guard; emit leaves vs.
+   internals deterministically.
+4) p8est mapping: Brick partition; split global keys into (tree, local); refine
+   uniformly per tree to a policy‑driven target level; initialize per‑quadrant data
+   (e.g., mean probability) and balance.
+5) Visualization: Render slices, projections, and montages from CSV for inspection.
+
+## Use‑Case Examples
+
+- Dense center, sparse periphery: The MVN demo (python/examples/mvn_viz_demo.py)
+  samples a mixture of multivariate normals and rejects points near the periphery
+  to produce varied occupancy — illustrating banded colormaps (free/unknown/occupied),
+  projections, montages, and overlays.
+- Multi‑chunk sensor fusion: Feed each chunk with its point cloud, export WorkerOuts,
+  then unify into a global hierarchy — leaves carry fused probabilities; internals
+  indicate regions where children exist and exceed τ.
+- AMR pre‑mesh: Choose a per‑tree refinement policy (uniform, quantile/bands by
+  counts/means) to generate a p8est forest that’s both compact and simulation‑ready.
+
 ## Quick start
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
