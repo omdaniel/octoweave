@@ -1,0 +1,55 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.10",
+  "cmake>=3.18",
+  "ninja; platform_system != 'Windows'",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "octoweave-py"
+version = "0.1.0"
+description = "Python wrapper for OctoWeave (ctypes)"
+authors = [{name = "OctoWeave"}]
+requires-python = ">=3.8"
+readme = "README.md"
+keywords = ["octomap", "p8est", "hierarchy", "octree", "visualization"]
+
+[project.optional-dependencies]
+dev = [
+  "numpy>=1.20; python_version>='3.8'",
+  "pandas>=1.5",
+  "pyarrow>=8; platform_system!='Windows'",
+  "fastparquet>=0.8; platform_system!='Windows'",
+  "matplotlib>=3.7"
+]
+test = [
+  "pytest",
+]
+tests = [
+  "pytest",
+]
+
+[tool.setuptools]
+packages = ["octoweave_py"]
+package-dir = {"" = "."}
+include-package-data = true
+
+[tool.setuptools.package-data]
+octoweave_py = [
+  "liboctoweave_c.*",
+  "octoweave_c.*",
+]
+
+[project.scripts]
+octoweave-pipeline = "octoweave_py.cli:main"
+octoweave-vizpy = "octoweave_py.viz_cli:main"
+
+[tool.scikit-build]
+cmake.source-dir = ".."
+[tool.scikit-build.cmake.define]
+OCTOWEAVE_BUILD_PYTHON = "ON"
+[tool.scikit-build.wheel]
+packages = ["octoweave_py"]
+# If migrating to a CPython extension in the future, you can enable ABI3 tagging:
+# py-api = "cp38"  # build CPython ABI3 wheels (requires extension to be abi3-safe)

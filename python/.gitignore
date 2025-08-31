@@ -1,0 +1,12 @@
+# Python packaging/build artifacts and local envs (do not blanket-ignore all)
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+wheelhouse/
+
+# Shared libs copied into package by CMake
+octoweave_py/liboctoweave_c.*
+octoweave_py/octoweave_c.*
