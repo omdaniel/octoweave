@@ -24,6 +24,16 @@ public:
     double prob_miss = 0.4;
     double clamp_min = 0.12;
     double clamp_max = 0.97;
+    // Pointcloud insertion params
+    Pt origin{0.0, 0.0, 0.0};
+    double max_range = -1.0;      // <=0 means unlimited
+    bool lazy_eval = false;        // OctoMap lazy update
+    bool discretize = false;       // Discretize the point cloud
+    // Emission control
+    // Emit probabilities at a resolution, not a raw depth. If emit_res <= 0, use tree resolution.
+    double emit_res = -1.0;
+    // Safety cap on maximum depth used for emission to prevent huge trees
+    int max_depth_cap = 8;
   };
   // Build a per-chunk tree from points and export WorkerOut
   static WorkerOut build_and_export(const std::vector<Pt>& pts, const Params& p);

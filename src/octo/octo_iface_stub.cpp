@@ -14,10 +14,11 @@ public:
   }
 };
 
+#ifndef OCTOWEAVE_WITH_OCTOMAP
 WorkerOut OctoChunker::build_and_export(const std::vector<Pt>& pts, const Params& p) {
   // Stub: place points in a trivial grid cell and accumulate with a simple union
   (void) p;
-  WorkerOut out; out.td = 8;
+  WorkerOut out; out.td = p.max_depth_cap > 0 ? p.max_depth_cap : 8;
   for (auto& pt : pts) {
     Key3 k{ (uint32_t)(pt.x), (uint32_t)(pt.y), (uint32_t)(pt.z) };
     double &slot = out.Ptd[k];
@@ -26,6 +27,7 @@ WorkerOut OctoChunker::build_and_export(const std::vector<Pt>& pts, const Params
   }
   return out;
 }
+#endif
 
 std::unique_ptr<IOctoTree> make_stub_tree_from_worker(const WorkerOut& w) {
   auto t = std::make_unique<StubTree>(w.td);

@@ -60,8 +60,8 @@ TEST_CASE("End-to-end: points -> chunks -> hierarchy -> forest -> viz") {
   // Load PGM and assert it has non-zero pixels
   std::ifstream pgm(out);
   REQUIRE((bool)pgm);
-  std::string magic; int W,H, maxv; pgm >> magic >> W >> H >> maxv;
+  std::string magic; int W,HH, maxv; pgm >> magic >> W >> HH >> maxv;
   REQUIRE(magic == "P2");
-  int sum=0; for (int i=0;i<W*H;++i){ int v; pgm >> v; sum += v; }
+  int sum=0; for (int i=0;i<W*HH;++i){ int v; pgm >> v; sum += v; }
   REQUIRE(sum > 0);
 }

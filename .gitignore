@@ -15,3 +15,32 @@ compile_commands.json
 
 # Mac
 .DS_Store
+
+# Additional ignores (curated)
+# CMake outputs
+build/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Testing/
+
+# Generated outputs
+examples_out/
+docs/_build/
+
+# Python environments and caches
+.venv/
+python/.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+
+# Python build artifacts
+python/dist/
+python/build/
+python/wheelhouse/
+
+# Packaged shared libraries copied into the package folder
+python/octoweave_py/liboctoweave_c.*
+python/octoweave_py/octoweave_c.*

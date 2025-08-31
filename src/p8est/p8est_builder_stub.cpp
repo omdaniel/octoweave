@@ -3,6 +3,7 @@
 
 namespace octoweave {
 
+#ifndef OCTOWEAVE_WITH_P8EST
 void P8estBuilder::prepare_want_sets(const Hierarchy& H, const Config& cfg) {
   // Stub: print a tiny summary so we know mapping will be called later.
   size_t leaves = 0, internals = 0;
@@ -18,5 +19,20 @@ std::pair<Key3, Key3> P8estBuilder::split_global_to_tree_local(const Key3& k, in
   Key3 local{ (uint32_t)(k.x / (uint32_t)n), (uint32_t)(k.y / (uint32_t)n), (uint32_t)(k.z / (uint32_t)n) };
   return {tree, local};
 }
+
+int P8estBuilder::build_forest(const Hierarchy& H, const Config& cfg) {
+  // Stub: just call prepare_want_sets and return success.
+  prepare_want_sets(H, cfg);
+  return 0;
+}
+
+P8estBuilder::ForestHandle::~ForestHandle() = default;
+
+P8estBuilder::ForestHandle* P8estBuilder::build_forest_handle(const Hierarchy& H, const Config& cfg) {
+  // Stub: return an empty handle after preparing want sets.
+  prepare_want_sets(H, cfg);
+  return new ForestHandle();
+}
+#endif
 
 } // namespace octoweave
