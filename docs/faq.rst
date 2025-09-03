@@ -1,7 +1,7 @@
 FAQ
 ===
 
-Does OctoWeave require OctoMap/p8est?
+Does OctoWeave require OctoMap/p4est?
 -------------------------------------
 
 No. Stub implementations let you build and run tests without external deps. Enable
@@ -16,4 +16,3 @@ How are probabilities combined?
 --------------------------------
 
 Per–node combiners use numerically stable union: ``1 - Π (1 - p)``.
-

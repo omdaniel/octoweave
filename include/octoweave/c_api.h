@@ -37,7 +37,7 @@ int ow_hierarchy_write_csv(ow_hierarchy_t h, const char* path);
 // Destroy hierarchy handle
 void ow_hierarchy_free(ow_hierarchy_t h);
 
-// Build a p8est forest with uniform target level (real build) or stub (returns success)
+// Build a p4est-based octree forest with uniform target level (real build) or stub (returns success)
 ow_forest_t ow_build_forest_uniform(ow_hierarchy_t h, int n, int level);
 
 // Destroy forest handle

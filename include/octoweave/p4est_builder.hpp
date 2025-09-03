@@ -8,7 +8,12 @@
 
 namespace octoweave {
 
-struct P8estBuilder {
+// Note: Named P4estBuilder for consistency with the p4est project packaging.
+// This implements a 3D octree mapping API (n^3 brick roots) with a stubbed
+// backend by default. Real integration, if enabled, should be guarded by
+// OCTOWEAVE_WITH_P4EST and include the appropriate headers from the p4est project
+// (using the p8est API for 3D under the hood).
+struct P4estBuilder {
   struct Config {
     int n = 2; // brick n×n×n
     // Optional per-tree target level policy. If unset, defaults to (H.td - H.base_depth).
@@ -43,7 +48,7 @@ struct P8estBuilder {
       for (const auto& kv : H.nodes) {
         const NDKey& nd = kv.first; const NodeRec& rec = kv.second;
         if (!rec.is_leaf || nd.d != (uint16_t)H.td) continue;
-        auto split = P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+        auto split = P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
         const Key3& t = split.first;
         size_t idx = (size_t)t.x + (size_t)n * ((size_t)t.y + (size_t)n * (size_t)t.z);
         if (idx < T) counts[idx] += 1;
@@ -72,7 +77,7 @@ struct P8estBuilder {
       for (const auto& kv : H.nodes) {
         const NDKey& nd = kv.first; const NodeRec& rec = kv.second;
         if (!rec.is_leaf || nd.d != (uint16_t)H.td) continue;
-        auto split = P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+        auto split = P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
         const Key3& t = split.first;
         size_t idx = (size_t)t.x + (size_t)n * ((size_t)t.y + (size_t)n * (size_t)t.z);
         if (idx < T) { sum[idx] += rec.p; cnt[idx] += 1; }
@@ -94,7 +99,7 @@ struct P8estBuilder {
       for (const auto& kv : H.nodes) {
         const NDKey& nd = kv.first; const NodeRec& rec = kv.second;
         if (!rec.is_leaf || nd.d != (uint16_t)H.td) continue;
-        auto split = P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+        auto split = P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
         const Key3& t = split.first;
         size_t idx = (size_t)t.x + (size_t)n * ((size_t)t.y + (size_t)n * (size_t)t.z);
         if (idx < T) counts[idx] += 1;
@@ -134,7 +139,7 @@ struct P8estBuilder {
       for (const auto& kv : H.nodes) {
         const NDKey& nd = kv.first; const NodeRec& rec = kv.second;
         if (!rec.is_leaf || nd.d != (uint16_t)H.td) continue;
-        auto split = P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+        auto split = P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
         const Key3& t = split.first;
         size_t idx = (size_t)t.x + (size_t)n * ((size_t)t.y + (size_t)n * (size_t)t.z);
         if (idx < T) counts[idx] += 1;
@@ -162,7 +167,7 @@ struct P8estBuilder {
       for (const auto& kv : H.nodes) {
         const NDKey& nd = kv.first; const NodeRec& rec = kv.second;
         if (!rec.is_leaf || nd.d != (uint16_t)H.td) continue;
-        auto split = P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+        auto split = P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
         const Key3& t = split.first;
         size_t idx = (size_t)t.x + (size_t)n * ((size_t)t.y + (size_t)n * (size_t)t.z);
         if (idx < T) { sum[idx] += rec.p; cnt[idx] += 1; }
@@ -178,11 +183,10 @@ struct P8estBuilder {
       return from_levels(std::move(out));
     }
   };
-  // Stub: map hierarchy to per-tree "want sets" structure (no p8est dep yet)
+  // Stub: map hierarchy to per-tree "want sets" structure (no external dep yet)
   static void prepare_want_sets(const Hierarchy& H, const Config& cfg);
 
-  // Build a (stubbed or real) p8est forest from the hierarchy and config.
-  // Returns 0 on success.
+  // Build a (stubbed or real) forest from the hierarchy and config. Returns 0 on success.
   static int build_forest(const Hierarchy& H, const Config& cfg);
 
   // Opaque forest handle for later phases (owns forest resources when real).

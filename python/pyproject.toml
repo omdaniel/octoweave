@@ -13,7 +13,7 @@ description = "Python wrapper for OctoWeave (ctypes)"
 authors = [{name = "OctoWeave"}]
 requires-python = ">=3.8"
 readme = "README.md"
-keywords = ["octomap", "p8est", "hierarchy", "octree", "visualization"]
+keywords = ["octomap", "p4est", "hierarchy", "octree", "visualization"]
 
 [project.optional-dependencies]
 dev = [

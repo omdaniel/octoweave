@@ -13,10 +13,10 @@ Phases (execute in order, one at a time):
 3) Prob union — implement union_prob8_stable + tests (AGENTS.md §3).
 4) Hierarchy — implement bottom-up builder + tests (AGENTS.md §4).
 5) Octo interface — implement IOctoTree & OctoChunker stub + tests (AGENTS.md §5).
-6) p8est mapping (stub) — implement mapping + tests (AGENTS.md §6).
+6) p4est mapping (stub) — implement mapping + tests (AGENTS.md §6).
 7) Visualization tool — implement CLI & minimal rendering + tests (AGENTS.md §7).
 8) Parallel chunk execution — thread launcher + determinism tests (AGENTS.md §8).
-9) (Optional) OctoMap / p8est integrations behind flags (AGENTS.md §9).
+9) (Optional) OctoMap / p4est integrations behind flags (AGENTS.md §9).
 10) End-to-end demo + tests (AGENTS.md §10).
 
 Rules:
@@ -29,4 +29,3 @@ Exit criteria:
 - octoweave_viz produces expected images for tiny CSV inputs.
 
 Now begin with Phase 1.
-

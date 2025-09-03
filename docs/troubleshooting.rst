@@ -7,7 +7,7 @@ OctoMap dylib not found (macOS)
 Add RPATH: ``-DCMAKE_BUILD_RPATH=/opt/homebrew/opt/octomap/lib`` or set
 ``DYLD_LIBRARY_PATH`` temporarily.
 
-p8est not found
+p4est not found
 ---------------
 
 Ensure MacPorts pkg-config is visible: ``export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH``
@@ -24,4 +24,3 @@ Python cannot find shared library
 
 Build with ``-DOCTOWEAVE_BUILD_PYTHON=ON`` so CMake copies the shared library into
 ``python/octoweave_py/``. Then ``sys.path.insert(0,'python')`` before import.
-

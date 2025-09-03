@@ -4,7 +4,7 @@ Refinement Policies
 Policies (C++)
 --------------
 
-``octoweave::P8estBuilder::Policy`` helpers:
+``octoweave::P4estBuilder::Policy`` helpers:
 
 - ``uniform(level)``
 - ``from_levels(levels[n^3])``
@@ -17,7 +17,6 @@ Policies (C++)
 Per–quadrant means
 ------------------
 
-Real p8est integration initializes one double per quadrant as the mean of
+Real p4est integration initializes one double per quadrant as the mean of
 Hierarchy leaf probabilities at target level ``Ltarget(tree)`` after mapping
 global keys to tree–local coordinates.
-

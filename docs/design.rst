@@ -35,7 +35,7 @@ We represent nodes via ``NDKey { Key3 k; uint16_t d; }`` with custom hash. All m
 and traversals use deterministic iteration (e.g., predictable child ordering), so
 results are reproducible across runs and thread counts (given fixed inputs).
 
-p8est Mapping and Policies
+p4est Mapping and Policies
 --------------------------
 
 We map global keys into (tree, local) under a brick layout and split by modulo/divide.
@@ -67,4 +67,3 @@ For low‑level checks, we emit PGM/PPM and SVG histograms (CLI). For richer dis
 we use matplotlib (Python) with PNG outputs, discrete occupancy presets, projections,
 montages, and overlays. The Agg backend supports headless environments. We also export
 slice grids (CSV) to aid validation and testing.
-

@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include "octoweave/hierarchy.hpp"
-#include "octoweave/p8est_builder.hpp"
+#include "octoweave/p4est_builder.hpp"
 
 // Parse CSV lines: x,y,z,depth,prob
 static bool parse_csv(const std::string& path, std::vector<std::tuple<octoweave::Key3,int,double>>& out) {
@@ -51,17 +51,16 @@ int main(int argc, char** argv) {
   std::cout << "[ex04] H: td=" << H.td << ", leaf_count=";
   size_t lc=0; for (auto& kv : H.nodes) if (kv.second.is_leaf) ++lc; std::cout << lc << "\n";
 
-  P8estBuilder::Config cfg; cfg.n = 2; cfg.min_level = 0; cfg.max_level = 12;
-  cfg.level_policy = P8estBuilder::Policy::uniform(std::max(0, H.td - H.base_depth));
+  P4estBuilder::Config cfg; cfg.n = 2; cfg.min_level = 0; cfg.max_level = 12;
+  cfg.level_policy = P4estBuilder::Policy::uniform(std::max(0, H.td - H.base_depth));
 
-#ifdef OCTOWEAVE_WITH_P8EST
-  std::cout << "[ex04] Building p8est forest...\n";
-  int rc = P8estBuilder::build_forest(H, cfg);
+#ifdef OCTOWEAVE_WITH_P4EST
+  std::cout << "[ex04] Building p4est forest...\n";
+  int rc = P4estBuilder::build_forest(H, cfg);
   std::cout << "[ex04] build_forest rc=" << rc << "\n";
 #else
-  std::cout << "[ex04] OCTOWEAVE_WITH_P8EST is OFF; printing want sets only.\n";
-  P8estBuilder::prepare_want_sets(H, cfg);
+  std::cout << "[ex04] OCTOWEAVE_WITH_P4EST is OFF; printing want sets only.\n";
+  P4estBuilder::prepare_want_sets(H, cfg);
 #endif
   return 0;
 }
-

@@ -3,7 +3,7 @@
 #include "octoweave/octo_iface.hpp"
 #include "octoweave/hierarchy.hpp"
 #include "octoweave/parallel.hpp"
-#include "octoweave/p8est_builder.hpp"
+#include "octoweave/p4est_builder.hpp"
 #include "octoweave/viz.hpp"
 #include <vector>
 #include <fstream>
@@ -34,8 +34,8 @@ TEST_CASE("End-to-end: points -> chunks -> hierarchy -> forest -> viz") {
   size_t leaf_count = 0; for (auto& kv : H.nodes) if (kv.second.is_leaf) ++leaf_count;
   REQUIRE(leaf_count >= 8); // should have at least one leaf per chunk
 
-  // 4) p8est mapping (stub)
-  P8estBuilder::prepare_want_sets(H, P8estBuilder::Config{2});
+  // 4) p4est mapping (stub)
+  P4estBuilder::prepare_want_sets(H, P4estBuilder::Config{2});
 
   // 5) Viz: export leaves to CSV and render one slice
   std::filesystem::create_directories("e2e_tmp");

@@ -42,7 +42,7 @@ Hierarchy
 
 ``Hierarchy make_hierarchy_from_workers(const std::vector<WorkerOut>&, double tau, bool use_logodds, double p_unknown, int base_depth)``
 
-P8estBuilder
+P4estBuilder
 ------------
 
 ``prepare_want_sets``, ``build_forest``, ``build_forest_handle`` and ``split_global_to_tree_local``.
@@ -52,4 +52,3 @@ Viz
 ---
 
 ``int viz_main(int argc, char** argv)``
-

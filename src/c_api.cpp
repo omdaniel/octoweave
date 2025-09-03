@@ -1,7 +1,7 @@
 #include "octoweave/c_api.h"
 #include "octoweave/octo_iface.hpp"
 #include "octoweave/hierarchy.hpp"
-#include "octoweave/p8est_builder.hpp"
+#include "octoweave/p4est_builder.hpp"
 #include "octoweave/viz.hpp"
 #include <vector>
 #include <fstream>
@@ -60,21 +60,21 @@ void ow_hierarchy_free(ow_hierarchy_t h) {
 
 ow_forest_t ow_build_forest_uniform(ow_hierarchy_t h, int n, int level) {
   if (!h || n <= 0) return nullptr;
-  octoweave::P8estBuilder::Config cfg; cfg.n = n; cfg.min_level = 0; cfg.max_level = 30;
-  cfg.level_policy = octoweave::P8estBuilder::Policy::uniform(level);
-#ifdef OCTOWEAVE_WITH_P8EST
-  auto* fh = octoweave::P8estBuilder::build_forest_handle(h->H, cfg);
+  octoweave::P4estBuilder::Config cfg; cfg.n = n; cfg.min_level = 0; cfg.max_level = 30;
+  cfg.level_policy = octoweave::P4estBuilder::Policy::uniform(level);
+#ifdef OCTOWEAVE_WITH_P4EST
+  auto* fh = octoweave::P4estBuilder::build_forest_handle(h->H, cfg);
   auto* f = new ow_forest_s(); f->impl = (void*) fh; return f;
 #else
-  octoweave::P8estBuilder::prepare_want_sets(h->H, cfg);
+  octoweave::P4estBuilder::prepare_want_sets(h->H, cfg);
   auto* f = new ow_forest_s(); f->impl = nullptr; return f;
 #endif
 }
 
 void ow_forest_free(ow_forest_t f) {
-#ifdef OCTOWEAVE_WITH_P8EST
+#ifdef OCTOWEAVE_WITH_P4EST
   if (f && f->impl) {
-    auto* fh = reinterpret_cast<octoweave::P8estBuilder::ForestHandle*>(f->impl);
+    auto* fh = reinterpret_cast<octoweave::P4estBuilder::ForestHandle*>(f->impl);
     delete fh; f->impl = nullptr;
   }
 #endif
@@ -97,7 +97,7 @@ int ow_levels_by_leafcount_quantiles(ow_hierarchy_t h, int n,
   for (const auto& kv : h->H.nodes) {
     const octoweave::NDKey& nd = kv.first; const octoweave::NodeRec& rec = kv.second;
     if (!rec.is_leaf || nd.d != (uint16_t)h->H.td) continue;
-    auto split = octoweave::P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+    auto split = octoweave::P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
     size_t idx = flat_tree_index(split.first, n);
     if (idx < T) counts[idx] += 1;
   }
@@ -127,7 +127,7 @@ int ow_levels_bands_by_mean_prob(ow_hierarchy_t h, int n,
   for (const auto& kv : h->H.nodes) {
     const octoweave::NDKey& nd = kv.first; const octoweave::NodeRec& rec = kv.second;
     if (!rec.is_leaf || nd.d != (uint16_t)h->H.td) continue;
-    auto split = octoweave::P8estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
+    auto split = octoweave::P4estBuilder::split_global_to_tree_local(nd.k, nd.d, n);
     size_t idx = flat_tree_index(split.first, n);
     if (idx < T) { sum[idx] += rec.p; cnt[idx] += 1; }
   }

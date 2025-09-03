@@ -7,14 +7,14 @@ Implement a fast, testable pipeline:
 1) Partition points into n×n×n chunks
 2) Build per-chunk OctoMap trees (parallelizable)
 3) Bottom-up union of children into a global hierarchy
-4) Map to a p8est forest with n³ root trees
+4) Map to a p4est forest with n³ root trees
 5) Provide a visualization tool for OctoMap levels
 6) Add strong unit/integration tests at each phase
 
 ## Constraints
 - C++17, CMake. Keep public APIs stable.
 - No external deps besides Catch2 (via FetchContent).
-- OctoMap and p8est integration code should be behind `OCTOWEAVE_WITH_*` flags and can be developed later. Provide clean stubs + interfaces now.
+- OctoMap and p4est integration code should be behind `OCTOWEAVE_WITH_*` flags and can be developed later. Provide clean stubs + interfaces now.
 
 ## Phases (execute strictly in order; gate each phase with tests)
 1. **Scaffold sanity**
@@ -38,9 +38,9 @@ Implement a fast, testable pipeline:
    - Implement in-memory leaf export keyed by `(x,y,z,depth,prob)`.
    - Tests: chunk → leaves at forced `td`.
 
-6. **p8est mapping (stub)**
-   - Define `P8estBuilder` API: brick(n³), refine_cb contract, init_cb contract.
-   - Provide data structures for “want sets” (no real p8est yet).
+6. **p4est mapping (stub)**
+   - Define `P4estBuilder` API: brick(n³), refine_cb contract, init_cb contract.
+   - Provide data structures for “want sets” (no real p4est yet).
    - Tests: mapping from global `(k,d)` to tree-local coords is correct.
 
 7. **Visualization tool**
@@ -55,7 +55,7 @@ Implement a fast, testable pipeline:
 
 9. **Integrations (optional)**
    - `OCTOWEAVE_WITH_OCTOMAP`: wire OctoMap-based builder.
-   - `OCTOWEAVE_WITH_P8EST`: scaffold real p8est build (behind flag).
+   - `OCTOWEAVE_WITH_P4EST`: real p4est-backed build (behind flag).
 
 10. **End-to-end demo**
     - Small synthetic input → chunks → hierarchy → (stubbed) forest → viz.

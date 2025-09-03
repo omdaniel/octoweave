@@ -6,7 +6,7 @@ C++
 
 - ex01: Build a synthetic hierarchy, write CSV
   ``./build/ex01_synthetic_hierarchy``
-- ex02: Forest policies (real when p8est ON)
+- ex02: Forest policies (real when p4est ON)
   ``./build/ex02_forest_policies``
 - ex03: Render a CSV slice & histogram
   ``./build/ex03_viz_export``
@@ -24,4 +24,3 @@ Python
   ``python python/examples/render_csv.py examples_out/leaves.csv 0 -1``
 - Parquet → pipeline → viz:
   ``python python/examples/parquet_pipeline_demo.py``
-

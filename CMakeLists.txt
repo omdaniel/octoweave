@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(OCTOWEAVE_WITH_OCTOMAP "Enable OctoMap integration" OFF)
-option(OCTOWEAVE_WITH_P8EST   "Enable p8est integration"   OFF)
+option(OCTOWEAVE_WITH_P4EST   "Enable p4est integration (octree path)"   OFF)
 option(OCTOWEAVE_BUILD_TESTS  "Build unit tests"           ON)
 option(OCTOWEAVE_BUILD_EXAMPLES "Build example programs"   ON)
 option(OCTOWEAVE_BUILD_PYTHON   "Prepare Python ctypes lib" ON)
@@ -25,7 +25,7 @@ if(NOT Catch2_FOUND)
   FetchContent_MakeAvailable(catch2)
 endif()
 
-# Optional external integrations (OctoMap / p8est via MacPorts/Homebrew)
+# Optional external integrations (OctoMap / p4est via MacPorts/Homebrew)
 find_package(PkgConfig QUIET)
 
 add_library(octoweave STATIC
@@ -35,8 +35,7 @@ add_library(octoweave STATIC
   src/utils/logging.cpp
   src/octo/octo_iface_stub.cpp
   src/octo/octo_iface_octomap.cpp
-  src/p8est/p8est_builder_stub.cpp
-  src/p8est/p8est_builder_real.cpp
+  src/p4est/p4est_builder_stub.cpp
   src/parallel/parallel.cpp
   src/viz/viz_impl.cpp
 )
@@ -138,62 +137,63 @@ if (OCTOWEAVE_BUILD_DOCS)
   endif()
 endif()
 
-# --- p8est integration (via MacPorts pkg-config) ---
-if (OCTOWEAVE_WITH_P8EST)
-  message(STATUS "OCTOWEAVE_WITH_P8EST=ON: looking for p8est (and sc/p4est)")
-  set(_ow_have_p8est FALSE)
+# --- p4est integration (via MacPorts/Homebrew pkg-config) ---
+if (OCTOWEAVE_WITH_P4EST)
+  message(STATUS "OCTOWEAVE_WITH_P4EST=ON: looking for p4est (and sc)")
+  set(_ow_have_p4est FALSE)
   if (PkgConfig_FOUND)
-    pkg_check_modules(P8EST QUIET p8est)
-    if (P8EST_FOUND)
-      set(_ow_have_p8est TRUE)
-      message(STATUS "Found p8est via pkg-config: cflags='${P8EST_CFLAGS}', libs='${P8EST_LIBRARIES}', libdirs='${P8EST_LIBRARY_DIRS}'")
-      target_include_directories(octoweave PUBLIC ${P8EST_INCLUDE_DIRS})
-      target_link_directories(octoweave PUBLIC ${P8EST_LIBRARY_DIRS})
-      target_link_libraries(octoweave PUBLIC ${P8EST_LIBRARIES})
+    pkg_check_modules(P4EST QUIET p4est)
+    if (P4EST_FOUND)
+      set(_ow_have_p4est TRUE)
+      message(STATUS "Found p4est via pkg-config: cflags='${P4EST_CFLAGS}', libs='${P4EST_LIBRARIES}', libdirs='${P4EST_LIBRARY_DIRS}'")
+      target_include_directories(octoweave PUBLIC ${P4EST_INCLUDE_DIRS})
+      target_link_directories(octoweave PUBLIC ${P4EST_LIBRARY_DIRS})
+      target_link_libraries(octoweave PUBLIC ${P4EST_LIBRARIES})
     endif()
   endif()
 
   # Fallback: manual search at common MacPorts locations
-  if (NOT _ow_have_p8est)
-    find_path(P8EST_INCLUDE_DIR p8est.h
+  if (NOT _ow_have_p4est)
+    find_path(P4EST_INCLUDE_DIR p4est.h
       HINTS /opt/local/include ${CMAKE_PREFIX_PATH}/include)
-    find_library(P8EST_LIB p8est HINTS /opt/local/lib ${CMAKE_PREFIX_PATH}/lib)
     find_library(P4EST_LIB p4est HINTS /opt/local/lib ${CMAKE_PREFIX_PATH}/lib)
     find_library(SC_LIB sc HINTS /opt/local/lib ${CMAKE_PREFIX_PATH}/lib)
-    if (P8EST_INCLUDE_DIR AND P8EST_LIB AND P4EST_LIB AND SC_LIB)
-      set(_ow_have_p8est TRUE)
-      set(P8EST_INCLUDE_DIRS ${P8EST_INCLUDE_DIR})
-      set(P8EST_LIBRARY_DIRS /opt/local/lib ${CMAKE_PREFIX_PATH}/lib)
-      set(P8EST_LIBRARIES ${P8EST_LIB} ${P4EST_LIB} ${SC_LIB})
-      message(STATUS "Found p8est via manual search: includes='${P8EST_INCLUDE_DIRS}', libs='${P8EST_LIBRARIES}'")
-      target_include_directories(octoweave PUBLIC ${P8EST_INCLUDE_DIRS})
-      target_link_libraries(octoweave PUBLIC ${P8EST_LIBRARIES})
+    if (P4EST_INCLUDE_DIR AND P4EST_LIB AND SC_LIB)
+      set(_ow_have_p4est TRUE)
+      set(P4EST_INCLUDE_DIRS ${P4EST_INCLUDE_DIR})
+      set(P4EST_LIBRARY_DIRS /opt/local/lib ${CMAKE_PREFIX_PATH}/lib)
+      set(P4EST_LIBRARIES ${P4EST_LIB} ${SC_LIB})
+      message(STATUS "Found p4est via manual search: includes='${P4EST_INCLUDE_DIRS}', libs='${P4EST_LIBRARIES}'")
+      target_include_directories(octoweave PUBLIC ${P4EST_INCLUDE_DIRS})
+      target_link_libraries(octoweave PUBLIC ${P4EST_LIBRARIES})
     endif()
   endif()
 
-  if (NOT _ow_have_p8est)
-    message(FATAL_ERROR "OCTOWEAVE_WITH_P8EST=ON but p8est not found. Ensure pkg-config can see p8est or set CMAKE_PREFIX_PATH (e.g., /opt/local).")
+  if (NOT _ow_have_p4est)
+    message(FATAL_ERROR "OCTOWEAVE_WITH_P4EST=ON but p4est not found. Ensure pkg-config can see p4est or set CMAKE_PREFIX_PATH (e.g., /opt/local).")
   endif()
 
-  target_compile_definitions(octoweave PUBLIC OCTOWEAVE_WITH_P8EST=1)
+  target_compile_definitions(octoweave PUBLIC OCTOWEAVE_WITH_P4EST=1)
   if (APPLE)
-    set(_ow_p8_rpaths ${P8EST_LIBRARY_DIRS} /opt/local/lib)
-    list(REMOVE_DUPLICATES _ow_p8_rpaths)
+    set(_ow_p4_rpaths ${P4EST_LIBRARY_DIRS} /opt/local/lib)
+    list(REMOVE_DUPLICATES _ow_p4_rpaths)
     # Append to any existing rpaths from OctoMap
     get_target_property(_ow_existing_rpath octoweave BUILD_RPATH)
     if (_ow_existing_rpath)
-      list(APPEND _ow_p8_rpaths ${_ow_existing_rpath})
+      list(APPEND _ow_p4_rpaths ${_ow_existing_rpath})
     endif()
-    set_target_properties(octoweave PROPERTIES BUILD_RPATH "${_ow_p8_rpaths}")
+    set_target_properties(octoweave PROPERTIES BUILD_RPATH "${_ow_p4_rpaths}")
     if (TARGET octoweave_viz)
-      set_target_properties(octoweave_viz PROPERTIES BUILD_RPATH "${_ow_p8_rpaths}")
+      set_target_properties(octoweave_viz PROPERTIES BUILD_RPATH "${_ow_p4_rpaths}")
     endif()
     if (TARGET ow_unit_tests)
-      set_target_properties(ow_unit_tests PROPERTIES BUILD_RPATH "${_ow_p8_rpaths}")
+      set_target_properties(ow_unit_tests PROPERTIES BUILD_RPATH "${_ow_p4_rpaths}")
     endif()
   endif()
-  # Tiny probe TU ensures link references p8est symbols
-  target_sources(octoweave PRIVATE src/p8est/p8est_probe.cpp)
+  # Tiny probe TU ensures link references p4est symbols
+  target_sources(octoweave PRIVATE src/p4est/p4est_probe.cpp)
+  # Real p4est-backed (3D) builder implementation using p8est API within p4est project
+  target_sources(octoweave PRIVATE src/p4est/p4est_builder_real.cpp)
 endif()
 
 if (OCTOWEAVE_BUILD_TESTS)
@@ -203,7 +203,7 @@ if (OCTOWEAVE_BUILD_TESTS)
     tests/unit/test_prob_union.cpp
     tests/unit/test_hierarchy.cpp
     tests/unit/test_octo_iface.cpp
-    tests/unit/test_p8est_mapping.cpp
+    tests/unit/test_p4est_mapping.cpp
     tests/unit/test_parallel.cpp
     tests/unit/test_viz.cpp
     tests/unit/test_end_to_end.cpp
