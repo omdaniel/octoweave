@@ -29,78 +29,48 @@
         mpi = pkgs.openmpi;
         octomap = pkgs.octomap;
         p4est = pkgs.p4est;
-
-        # Project Python (pure nix variant)
-        py = pkgs.python312;
-        pyEnv = py.withPackages (ps: with ps; [
-          pip
-          setuptools
-          wheel
-          numpy
-          pandas
-          matplotlib
-          pillow
-          pytest
-        ]);
+        # Python toolchain: prefer Python 3.11 baseline and `uv` for dependency management
+        py = pkgs.python311;
+        uv = pkgs.uv;
       in
       {
-        # Pure nix dev shell (Python provided via withPackages)
+        # Single dev shell: C++ toolchain + optional libs + Python 3.11 + uv
         devShells.default = pkgs.mkShell {
           name = "octoweave-dev";
-          packages = toolchain ++ cmakeTools ++ coreLibs ++ [ octomap p4est mpi pyEnv git ];
+          packages = toolchain ++ cmakeTools ++ coreLibs ++ [ octomap p4est mpi py uv git pkgs.coreutils ];
 
           env = {
             CC = if pkgs.stdenv.isDarwin then "${pkgs.llvmPackages_17.clang}/bin/clang" else "${pkgs.gcc13}/bin/gcc";
             CXX = if pkgs.stdenv.isDarwin then "${pkgs.llvmPackages_17.clang}/bin/clang++" else "${pkgs.gcc13}/bin/g++";
             CMAKE_GENERATOR = "Ninja";
-          };
-
-          shellHook = ''
-            echo "[octoweave] Dev shell ready: CC=$CC CXX=$CXX"
-            echo "[octoweave] OctoMap → $(pkg-config --modversion octomap 2>/dev/null || echo not-found)"
-            echo "[octoweave] p4est   → $(pkg-config --modversion p4est 2>/dev/null || echo not-found)"
-          '';
-        };
-
-        # Dev shell that sets up a local .venv and stages headers/libs under ./.deps
-        devShells.staged = pkgs.mkShell {
-          name = "octoweave-dev-staged";
-          packages = toolchain ++ cmakeTools ++ coreLibs ++ [ octomap p4est mpi pkgs.python312 pkgs.python312Packages.virtualenv git pkgs.coreutils ];
-
-          env = {
-            CC = if pkgs.stdenv.isDarwin then "${pkgs.llvmPackages_17.clang}/bin/clang" else "${pkgs.gcc13}/bin/gcc";
-            CXX = if pkgs.stdenv.isDarwin then "${pkgs.llvmPackages_17.clang}/bin/clang++" else "${pkgs.gcc13}/bin/g++";
-            CMAKE_GENERATOR = "Ninja";
-            VENV_DIR = ".venv";
-            DEPS_DIR = ".deps";
+            # Where the pyproject.toml lives and where to place the venv
+            PY_PROJ_DIR = "python";
+            VENV_DIR = "python/.venv";
           };
 
           shellHook = ''
             set -euo pipefail
-
-            # 1) Project-local Python venv
-            if [ ! -d "$VENV_DIR" ]; then
-              echo "[octoweave] Creating local Python venv in $VENV_DIR"
-              python -m venv "$VENV_DIR"
-            fi
-            # shellcheck disable=SC1090
-            source "$VENV_DIR/bin/activate"
-            python -m pip --disable-pip-version-check install --upgrade pip >/dev/null
-            if [ -f requirements.txt ]; then
-              echo "[octoweave] Installing requirements.txt into $VENV_DIR"
-              pip install -r requirements.txt
-            fi
-
-            # 2) Stage headers/libs into ./.deps as symlinks for easy inspection/use
-            mkdir -p "$DEPS_DIR"/include "$DEPS_DIR"/lib
-            # Symlink entire include and lib trees for octomap and p4est
-            ln -snf ${octomap}/include "$DEPS_DIR/include/octomap"
-            ln -snf ${octomap}/lib     "$DEPS_DIR/lib/octomap"
-            ln -snf ${p4est}/include   "$DEPS_DIR/include/p4est"
-            ln -snf ${p4est}/lib       "$DEPS_DIR/lib/p4est"
-
-            echo "[octoweave] Staged deps under $DEPS_DIR (symlinks to nix store)"
             echo "[octoweave] Dev shell ready: CC=$CC CXX=$CXX"
+            echo "[octoweave] OctoMap → $(pkg-config --modversion octomap 2>/dev/null || echo not-found)"
+            echo "[octoweave] p4est   → $(pkg-config --modversion p4est 2>/dev/null || echo not-found)"
+
+            # Setup Python via uv using the project's pyproject.toml
+            if [ -d "$PY_PROJ_DIR" ] && [ -f "$PY_PROJ_DIR/pyproject.toml" ]; then
+              echo "[octoweave] Syncing Python deps with uv (py>=3.11)"
+              # Prefer nix-provided Python 3.11
+              PYBIN="${py}/bin/python3.11"
+              pushd "$PY_PROJ_DIR" >/dev/null
+              if [ ! -d .venv ]; then
+                uv venv --python "$PYBIN" .venv || true
+              fi
+              # Activate and sync dev/test extras
+              # shellcheck disable=SC1091
+              source .venv/bin/activate
+              uv sync -E dev -E test || true
+              popd >/dev/null
+            else
+              echo "[octoweave] Skipping uv sync: $PY_PROJ_DIR/pyproject.toml not found"
+            fi
           '';
         };
 
@@ -121,4 +91,3 @@
       }
     );
 }
-

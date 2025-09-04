@@ -2,7 +2,7 @@ import os
 import sys
 import ctypes as C
 from dataclasses import dataclass
-from typing import Iterable, Tuple
+from collections.abc import Iterable
 try:
     import numpy as _np  # optional
 except Exception:  # pragma: no cover
@@ -79,7 +79,7 @@ class ChunkParams:
     prob_miss: float = 0.4
     clamp_min: float = 0.12
     clamp_max: float = 0.97
-    origin: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    origin: tuple[float, float, float] = (0.0, 0.0, 0.0)
     max_range: float = -1.0
     lazy_eval: bool = False
     discretize: bool = False
@@ -107,7 +107,7 @@ class OctoWeave:
         self._h = None
         self._f = None
 
-    def build_hierarchy_from_points(self, xyz: Iterable[Tuple[float, float, float]], params: ChunkParams = ChunkParams(), tau: float = 0.5, p_unknown: float = 0.5, base_depth: int = 1):
+    def build_hierarchy_from_points(self, xyz: Iterable[tuple[float, float, float]], params: ChunkParams = ChunkParams(), tau: float = 0.5, p_unknown: float = 0.5, base_depth: int = 1):
         # Accept list/iterable of tuples or a numpy (k,3) array
         if _np is not None and isinstance(xyz, _np.ndarray):
             a = _np.asarray(xyz, dtype=_np.float64)
@@ -185,7 +185,7 @@ class OctoWeave:
 
     # Full pipeline helper: points -> hierarchy -> forest (uniform from policy) -> CSV -> viz
     def run_pipeline(self,
-                     xyz: Iterable[Tuple[float,float,float]],
+                     xyz: Iterable[tuple[float, float, float]],
                      params: ChunkParams,
                      n: int,
                      csv_path: str,

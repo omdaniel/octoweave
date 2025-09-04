@@ -3,16 +3,15 @@ import argparse
 import os
 import sys
 import random
-from typing import List, Tuple
 
 # Ensure local Python package is discoverable when running from repo root
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "python"))
 from octoweave_py import OctoWeave, ChunkParams  # type: ignore
 
 
-def make_blob_points(n: int, spread: float = 0.5) -> List[Tuple[float, float, float]]:
+def make_blob_points(n: int, spread: float = 0.5) -> list[tuple[float, float, float]]:
     random.seed(123)
-    pts: List[Tuple[float, float, float]] = []
+    pts: list[tuple[float, float, float]] = []
     centers = [
         (0.0, 0.0, 0.0),
         (3.0, 0.5, 0.5),
@@ -68,4 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

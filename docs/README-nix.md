@@ -1,9 +1,6 @@
 # OctoWeave — Nix Flake Dev Environment
 
-This repo includes a Nix flake that provisions a C++ toolchain, CMake/Ninja, OctoMap, p4est (C), OpenMPI, and a project Python. Two dev shells are provided:
-
-- `default`: Pure Nix Python (`python.withPackages`) and libraries on `PATH`/`CMAKE_PREFIX_PATH`.
-- `staged`: Adds a project-local `.venv` and symlinks headers/libs into `./.deps` for easy inspection or build systems that expect in-tree deps.
+This repo includes a Nix flake that provisions a C++ toolchain, CMake/Ninja, OctoMap, p4est (C), OpenMPI, and Python via `uv`. A single dev shell is provided, which sets up a Python 3.11 virtual environment using `uv` based on `python/pyproject.toml`.
 
 ## Prereqs
 
@@ -17,22 +14,13 @@ This repo includes a Nix flake that provisions a C++ toolchain, CMake/Ninja, Oct
 
 ## Quick start
 
-1) Enter the pure nix dev shell:
+1) Enter the dev shell:
 
 ```bash
 nix develop     # or: nix develop .
 ```
 
-You’ll get `clang` (macOS) or `gcc`, `cmake`, `ninja`, `pkg-config`, `octomap`, `p4est`, `openmpi`, and a Python with common packages.
-
-2) Or enter the staged shell (creates `.venv` and `./.deps`):
-
-```bash
-nix develop .#staged
-```
-
-- Python venv is created at `./.venv` and populated from `requirements.txt` if present.
-- Headers/libs for OctoMap and p4est are symlinked under `./.deps/{include,lib}`.
+You’ll get `clang` (macOS) or `gcc`, `cmake`, `ninja`, `pkg-config`, `octomap`, `p4est`, `openmpi`, and `uv` + Python 3.11. On entry, the shell runs `uv venv`/`uv sync` inside `python/` to create `python/.venv` from `python/pyproject.toml` (including `dev` and `test` extras). Activate it with `source python/.venv/bin/activate` or use `uv run`.
 
 ## Building with CMake
 
@@ -66,11 +54,10 @@ pkg-config --modversion p4est   || echo "p4est not found"
 
 ## Customizing Python
 
-- Pure nix route: edit `pyEnv` in `flake.nix` (search for `withPackages`) to add/remove Python packages.
-- Local venv route: add packages to `requirements.txt`. The `staged` shell installs them into `.venv`.
+- Edit `python/pyproject.toml` to change dependencies. Then run `uv sync` inside `python/`.
+- The project targets Python 3.11+ (`requires-python = ">=3.11"`). Lint config (Ruff) is set to `py311`.
 
 ## Troubleshooting
 
 - If `p4est`/`octomap` are missing for your platform in the pinned `nixos-24.05`, switch to `nixpkgs-unstable` in `flake.nix` and run `nix flake update`.
-- If a build system insists on in-tree paths, use the `staged` shell and point CMake to `./.deps` if needed.
-
+- If `uv sync` fails due to networking or index issues, you can still use the nix-provided Python directly (`${python311}/bin/python3.11`).

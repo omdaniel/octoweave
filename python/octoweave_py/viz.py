@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Sequence, Tuple, List, Union
+from collections.abc import Sequence
 
 try:
     import pandas as pd  # type: ignore
@@ -21,7 +21,7 @@ def _load_csv(csv_path: str):
     return {"x": data[:,0].astype(int), "y": data[:,1].astype(int), "z": data[:,2].astype(int), "depth": data[:,3].astype(int), "prob": data[:,4]}
 
 
-def _filter_depth_and_z(data, depth: Optional[int], z_values: Optional[Sequence[int]]):
+def _filter_depth_and_z(data, depth: int | None, z_values: Sequence[int] | None):
     if pd is not None and isinstance(data, pd.DataFrame):
         df = data
         if depth is None:
@@ -41,7 +41,7 @@ def _filter_depth_and_z(data, depth: Optional[int], z_values: Optional[Sequence[
     return out, depth
 
 
-def _make_grid(data) -> Tuple[np.ndarray, int, int]:
+def _make_grid(data) -> tuple[np.ndarray, int, int]:
     if pd is not None and isinstance(data, pd.DataFrame):
         xmax = int(data["x"].max()) if len(data) else 0
         ymax = int(data["y"].max()) if len(data) else 0
@@ -58,7 +58,7 @@ def _make_grid(data) -> Tuple[np.ndarray, int, int]:
     return img, W, H
 
 
-def _norm_for_discrete(discrete_levels: Optional[Sequence[float]], cmap_name: str):
+def _norm_for_discrete(discrete_levels: Sequence[float] | None, cmap_name: str):
     if not discrete_levels:
         return None, plt.get_cmap(cmap_name)
     import matplotlib.colors as mcolors
@@ -68,7 +68,7 @@ def _norm_for_discrete(discrete_levels: Optional[Sequence[float]], cmap_name: st
     return norm, cmap
 
 
-def occupancy_colormap_preset(name: str) -> Tuple[List[float], 'matplotlib.colors.Colormap', List[str]]:
+def occupancy_colormap_preset(name: str) -> tuple[list[float], 'matplotlib.colors.Colormap', list[str]]:
     """Return (levels, colormap, labels) for an occupancy band preset.
 
     Presets:
@@ -106,18 +106,18 @@ def occupancy_colormap_preset(name: str) -> Tuple[List[float], 'matplotlib.color
     raise ValueError(f"Unknown preset '{name}'")
 
 
-def render_slice_png(csv_path: str, out_png: str, z: int, depth: Optional[int] = None,
+def render_slice_png(csv_path: str, out_png: str, z: int, depth: int | None = None,
                      colormap: str = "viridis", grid: bool = True,
-                     vmin: Optional[float] = 0.0, vmax: Optional[float] = 1.0,
+                     vmin: float | None = 0.0, vmax: float | None = 1.0,
                      figsize=(6,6), dpi=150, colorbar: bool = True,
-                     discrete_levels: Optional[Sequence[float]] = None,
+                     discrete_levels: Sequence[float] | None = None,
                      legend: bool = False,
-                     preset: Optional[str] = None):
+                     preset: str | None = None):
     data = _load_csv(csv_path)
     df, depth = _filter_depth_and_z(data, depth, [z])
     img, W, H = _make_grid(df)
 
-    preset_labels: Optional[List[str]] = None
+    preset_labels: list[str] | None = None
     if preset:
         levels, cmap, preset_labels = occupancy_colormap_preset(preset)
         discrete_levels = levels
@@ -149,13 +149,13 @@ def render_slice_png(csv_path: str, out_png: str, z: int, depth: Optional[int] =
     plt.close(fig)
 
 
-def render_max_projection_png(csv_path: str, out_png: str, z_range: Tuple[int,int], depth: Optional[int] = None,
+def render_max_projection_png(csv_path: str, out_png: str, z_range: tuple[int,int], depth: int | None = None,
                               colormap: str = "magma", grid: bool = False,
-                              vmin: Optional[float] = 0.0, vmax: Optional[float] = 1.0,
+                              vmin: float | None = 0.0, vmax: float | None = 1.0,
                               figsize=(6,6), dpi=150, colorbar: bool = True, op: str = 'max',
-                              discrete_levels: Optional[Sequence[float]] = None,
+                              discrete_levels: Sequence[float] | None = None,
                               legend: bool = False,
-                              preset: Optional[str] = None):
+                              preset: str | None = None):
     zmin, zmax = z_range
     zs = list(range(zmin, zmax+1))
     data = _load_csv(csv_path)
@@ -217,7 +217,7 @@ def render_max_projection_png(csv_path: str, out_png: str, z_range: Tuple[int,in
     plt.close(fig)
 
 
-def render_montage(csv_path: str, out_png: str, zs: Sequence[int], depth: Optional[int] = None,
+def render_montage(csv_path: str, out_png: str, zs: Sequence[int], depth: int | None = None,
                    colormap: str = 'viridis', ncols: int = 4, grid: bool = True,
                    figsize=(10,6), dpi=150):
     data = _load_csv(csv_path)
@@ -258,7 +258,7 @@ def render_montage(csv_path: str, out_png: str, zs: Sequence[int], depth: Option
     plt.close(fig)
 
 
-def render_overlay_slices(csv_a: str, csv_b: str, out_png: str, z: int, depth: Optional[int] = None,
+def render_overlay_slices(csv_a: str, csv_b: str, out_png: str, z: int, depth: int | None = None,
                           colormap_a: str = 'Greens', colormap_b: str = 'Reds',
                           alpha_a: float = 0.6, alpha_b: float = 0.6, grid: bool = True,
                           figsize=(6,6), dpi=150):
@@ -283,7 +283,7 @@ def render_overlay_slices(csv_a: str, csv_b: str, out_png: str, z: int, depth: O
     plt.close(fig)
 
 
-def export_slice_grid(csv_path: str, out_csv: str, z: int, depth: Optional[int] = None):
+def export_slice_grid(csv_path: str, out_csv: str, z: int, depth: int | None = None):
     data = _load_csv(csv_path)
     df, depth = _filter_depth_and_z(data, depth, [z])
     img, W, H = _make_grid(df)
